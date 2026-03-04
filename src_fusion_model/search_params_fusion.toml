@@ -1,0 +1,17 @@
+[search]
+max_trials = 0  # 0 = run all combinations
+run_test_after_train = false
+save_every_trials = 1
+
+[grid]
+# Examples:
+window_length = [300, 400]
+hop_length = [150, 200]
+head_type = ["mlp", "linear"]
+hidden_dim = [128, 256]
+num_transformer_heads = [4, 8]
+tr_layers = [3, 5]
+dropout = [0.1, 0.2]
+lr = [1e-4, 5e-5]
+batch_size = [8]
+

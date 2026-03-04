@@ -1,0 +1,54 @@
+# Required paths
+annotations_root = "C:/Work/ABAW2026/affwild_df_annotation/annotations"
+test_list_path = "C:/Work/ABAW2026/affwild_df_annotation/annotations/CVPR_6th_ABAW_VA_test_set_example.txt"
+features_root = "E:/Databases/AffWild2/feature_AffWild2"
+output_dir = "C:/Work/CVPRW/src_fusion_model/outputs"
+cache_dir = "C:/Work/CVPRW/src_fusion_model/cache"
+
+# Modalities (subfolders inside features_root, each must contain train.pkl/val.pkl/test.pkl)
+modalities = ["face_features", "llm_multimodal_featuress"]
+modality_input_mode = "both"  # embedding | prediction | both
+
+# Transformer Q/K/V modality sources: modality name from list above or "fusion"
+q_modality = "face_features"
+k_modality = "llm_multimodal_featuress"
+v_modality = "llm_multimodal_featuress"
+
+# Windowing
+window_length = 400
+hop_length = 150
+time_delay = 0
+allow_nearest_train = true
+allow_nearest_val = true
+
+# Model (best run structure)
+head_type = "mlp"
+hidden_dim = 256
+num_transformer_heads = 8
+tr_layers = 5
+dropout = 0.1
+out_dim = 2
+
+# Optimization
+batch_size = 8
+num_workers = 0  # keep 0 for large PKL caches (Windows worker spawning duplicates memory)
+lr = 1e-4
+weight_decay = 0.01
+epochs = 100
+scheduler_patience = 5
+scheduler_factor = 0.1
+scheduler_min_lr = 0.0
+use_amp = false
+seed = 42
+
+# Early stopping
+early_stop_patience = 15
+early_stop_min_delta = 0.0
+
+# Optional debug limits (0 = all)
+max_train_samples = 0
+max_val_samples = 0
+max_test_samples = 0
+
+run_test_after_train = true
+

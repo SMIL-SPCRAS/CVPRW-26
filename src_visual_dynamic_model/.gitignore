@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local env files
+.env
+.env.*
+
+# Project runtime artifacts
+cache/
+outputs/
+outputs_*/
+*.log
+
+# Large training artifacts
+*.pt
+*.pth
+*.npz
+*.pkl
+
+# OS / editor
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/

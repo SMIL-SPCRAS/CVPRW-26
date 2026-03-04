@@ -1,0 +1,51 @@
+# Minimal config for training the best VisualDynamicModel setup
+
+# Data
+annotations_root = "C:/Work/ABAW2026/affwild_df_annotation/annotations"
+frames_root = "//SMIL/Databases_3/ABAW2024/data/frames"
+test_list_path = "C:/Work/ABAW2026/affwild_df_annotation/annotations/CVPR_6th_ABAW_VA_test_set_example.txt"
+features_root = "E:/Databases/AffWild2/feature_AffWild2/features_grada"
+output_dir = "C:/Work/CVPRW/src_visual_dynamic_model/outputs"
+cache_dir = "C:/Work/CVPRW/src_visual_dynamic_model/cache"
+
+# GRADA feature extraction (used by extract_grada_features.py)
+grada_repo_path = "C:/Work/ABAW2026/GRADA_emotion"
+grada_model_variant = "b1"
+grada_weights_path = "C:/Work/ABAW2026/GRADA_emotion/weights/affective_static_efficientNet_b1.pth"
+feature_batch_size = 32
+save_grada_predictions = true
+
+# Windowing
+window_length = 400
+hop_length = 150
+time_delay = 0
+allow_nearest_train = true
+allow_nearest_val = true
+
+# Model (best run structure)
+head_type = "mlp"
+hidden_dim = 256
+num_transformer_heads = 8
+tr_layers = 5
+dropout = 0.1
+out_dim = 2
+
+# Optimization
+batch_size = 8
+num_workers = 4
+lr = 1e-4
+weight_decay = 0.01
+epochs = 100
+scheduler_patience = 5
+scheduler_factor = 0.1
+scheduler_min_lr = 0.0
+use_amp = false
+seed = 42
+
+# Early stopping
+early_stop_patience = 15
+early_stop_min_delta = 0.0
+
+# Optional debug limits (0 = all)
+max_train_samples = 0
+max_val_samples = 0

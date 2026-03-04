@@ -1,0 +1,7 @@
+numpy>=1.24
+pandas>=1.5
+Pillow>=9.0
+tqdm>=4.65
+torch>=2.1
+torchvision>=0.16
+tomli>=2.0; python_version < "3.11"
