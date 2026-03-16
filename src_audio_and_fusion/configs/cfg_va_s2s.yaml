@@ -1,0 +1,137 @@
+seed: 0
+experiment_info:
+  params:
+    experiment_name: "10th_ABAW"
+    run_name: "emotion2vec"
+    datetime_format: "%Y-%m-%d_%H-%M"
+
+data:
+  name: "abaw_va_datamodule"
+  params:
+    dataset_path: "data/Chunk_wav"
+    train_csv: "data/labels_segmented_s2s_wav/train_audio_segment.csv"
+    val_csv: "data/labels_segmented_s2s_wav/val_audio_segment.csv"
+    batch_size: 8
+    num_workers: 8
+    augment: true
+    s2s: true
+    s2s_steps: 4
+    augment_params: 
+      aug_noise_prob: 0.6
+      aug_snr_db_min: 8.0
+      aug_snr_db_max: 25.0
+      aug_gain_prob: 0.3
+      aug_gain_db_min: -6.0
+      aug_gain_db_max: 6.0
+      aug_band_prob: 0.3
+      aug_reverb_prob: 0.2
+
+model:
+  name: "emotion2vec_s2s_model_v1"
+  params:
+    model_name: "emotion2vec_plus_base"
+    freeze_backbone: false
+    unfreeze_last_n_layers: 2
+    pooling: "attn_stats"
+    head_dropout: 0.2
+    input_normalize: true
+    attn_hidden_dim: 128
+    attn_dropout: 0.2
+
+train:
+  params:
+    epochs: 50
+    mixed_precision: true
+    device: "cuda"
+    log_every_steps: 50
+    grad_clip_norm: 1.0
+    use_scheduler: true
+    scheduler_step_per_epoch: true
+    scheduler_monitor: "val_framewise/va_ccc_metric"
+
+optimizer:
+  name: "adamw_two_group_optimizer"
+  params:
+    lr_backbone: 1.0e-6
+    lr_head: 2.0e-4
+    weight_decay: 0.01
+
+scheduler:
+  name: "named_reduceonplateau_scheduler"
+  params:
+    mode: "max"
+    factor: 0.5
+    patience: 2
+    threshold: 5.0e-4
+    min_lr: 1.0e-7
+    cooldown: 0
+    target_group_names: ["head"]
+
+loss:
+  name: "ccc_mse_loss"
+  params:
+    ccc_weight: 1
+    mse_weight: 0.1
+    v_weight: 0.7
+    a_weight: 0.3
+
+metrics:
+  - name: "va_ccc_metric"
+    params: {}
+
+logging:
+  - name: "mlflow_logger"
+    params:
+      tracking_uri: "sqlite:///logs/mlflow.db"
+  - name: "console_file_logger"
+    params:
+      log_path: "logs"
+      log_file: "train.log"
+      console_level: "INFO"
+      file_level: "INFO"
+
+callbacks:
+  - name: "ema_callback"
+    params:
+      decay: 0.998
+      update_every: 1
+      start_epoch: 0
+      use_ema_for_eval: true
+      use_ema_for_save: true
+  - name: "framewise_eval_callback"
+    params:
+      loader_name: "val_full"
+      log_prefix: "val_framewise"
+      overlap_strategy: "mean"
+      ann_root: "data/labels/VA_Estimation_Challenge"
+      ann_split_dir: "Validation_Set"
+      ann_ext: ".txt"
+  - name: "early_stopping_callback"
+    params:
+      monitor: "val_framewise/va_ccc_metric"
+      mode: "max"
+      patience: 6
+  - name: "checkpoint_callback"
+    params:
+      log_path: "logs"
+      filename_template: "epoch={epoch}_{monitor}={value:.4f}.pt"
+      monitor: "val_framewise/va_ccc_metric"
+      mode: "max"
+      save_top_k: 1
+      save_last: true
+  - name: "snapshot_callback"
+    params: 
+      log_path: "logs"
+      include: ["src"]
+      save_code_zip: true
+      save_config: true
+  - name: "telegram_notifier_callback"
+    params:
+      token_env_field: "TELEGRAM_BOT_TOKEN"
+      chat_id_env_field: "TELEGRAM_CHAT_ID"
+      message_prefix: "✅ Training finished"
+      message_suffix: ""
+      include_mlflow_experiment_name: true
+      include_trainer_progress: false
+      include_last_logs: true
+      request_timeout_sec: 15

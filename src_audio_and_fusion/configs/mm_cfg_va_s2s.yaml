@@ -1,0 +1,130 @@
+seed: 0
+experiment_info:
+  params:
+    experiment_name: "10th_ABAW_mm"
+    run_name: "simple_mm"
+    datetime_format: "%Y-%m-%d_%H-%M"
+
+data:
+  name: "abaw_mm_datamodule"
+  params:
+    audio: 
+      path: "data/features/audio_features_w_fcl_new" # produced by cfg_test_s2s_audio.yaml
+      emb_size: 256
+    use_predictions: true
+    target_source_modality: "face"
+    target_source_field: "label"
+    frame_index_offset: 1
+    mask_audio: true
+    audio_min_open_sec: 1
+    audio_min_coverage_ratio: 0.8
+    pin_memory: false
+    num_workers: 1
+    modalities:
+      face: 
+        path: "data/features/face_features" # see other modalities
+        emb_size: 256
+      qwen_mm: 
+        path: "data/features/qwen_mm" # see other modalities
+        emb_size: 256
+
+model:
+  name: "multimodal_fusion_model_v4"
+  params:
+    use_predictions: true
+    frame_modalities: ["face", "qwen_mm"] # see other modalities
+    hidden: 256
+    dropout: 0.1
+    num_heads: 4
+    num_temporal_layers: 1
+    num_audio_latents: 4
+    modality_priors:
+      face: 0.85
+      qwen_mm: 0.15
+
+train:
+  params:
+    epochs: 50
+    mixed_precision: true
+    device: "cuda"
+    log_every_steps: 50
+    grad_clip_norm: 1.0
+    use_scheduler: true
+    scheduler_step_per_epoch: true
+    scheduler_monitor: "val_framewise/va_ccc_metric"
+    collect_cache: false
+
+optimizer:
+  name: "adamw_optimizer"
+  params:
+    lr: 5e-5
+    weight_decay: 0.01
+
+loss:
+  name: "ccc_mse_mm_loss"
+  params:
+    ccc_weight: 1
+    mse_weight: 0.01
+    v_weight: 0.7
+    a_weight: 0.3
+
+metrics:
+  - name: "va_ccc_metric"
+    params: {}
+
+logging:
+  - name: "mlflow_logger"
+    params:
+      tracking_uri: "sqlite:///logs/mlflow.db"
+  - name: "console_file_logger"
+    params:
+      log_path: "logs"
+      log_file: "train.log"
+      console_level: "INFO"
+      file_level: "INFO"
+
+callbacks:
+  - name: "multimodal_framewise_v2_callback"
+    params:
+      loader_name: "val"
+      log_prefix: "val_framewise"
+      ann_root: "data/labels/VA_Estimation_Challenge"
+      ann_split_dir: "Validation_Set"
+      overlap_strategy: "mean"
+      smoothing: "moving_average"
+      smoothing_valence_param: 7
+      smoothing_arousal_param: 13
+      dump_pickle: false
+      frame_index_offset: 1
+  - name: "early_stopping_callback"
+    params:
+      monitor: "val_framewise/va_ccc_metric"
+      mode: "max"
+      patience: 6
+  - name: "checkpoint_callback"
+    params:
+      log_path: "logs"
+      filename_template: "epoch={epoch}_{monitor}={value:.4f}.pt"
+      monitor: "val_framewise/va_ccc_metric"
+      mode: "max"
+      save_top_k: 1
+      save_last: true
+  - name: "snapshot_callback"
+    params: 
+      log_path: "logs"
+      include: ["src"]
+      save_code_zip: true
+      save_config: true
+  - name: "telegram_notifier_callback"
+    params:
+      token_env_field: "TELEGRAM_BOT_TOKEN"
+      chat_id_env_field: "TELEGRAM_CHAT_ID"
+      message_prefix: "✅ Training finished"
+      message_suffix: ""
+      include_mlflow_experiment_name: true
+      include_trainer_progress: false
+      include_last_logs: true
+      include_best_logs: true
+      monitor: "val_framewise/va_ccc_metric"
+      mode: "max"
+      request_timeout_sec: 15

@@ -1,0 +1,5 @@
+video_dir: "data/videos"
+output_csv: "data/videos_fps.csv"
+
+ffprobe_bin: "ffprobe"
+video_exts: ["mp4", "mkv", "mov", "avi", "webm", "m4v"]
