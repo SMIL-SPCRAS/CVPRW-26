@@ -1,0 +1,20 @@
+[grid]
+# mamba_layers = [8,10,12]
+# model_d_model = [128, 256, 384]
+# mamba_kernel_size = [5,6,7]
+# model_dropout = [0.1, 0.2]
+lr = [3e-4, 3.25e-4, 3.5e-4, 4e-4,5e-4,]
+# weight_decay = [1e-4, 1e-3]
+
+[defaults]
+lr = 0.0001
+weight_decay = 0.0001
+model_arch = "mamba"
+model_d_model = 256
+model_dropout = 0.2
+model_head_hidden_dim = 256
+model_head_dropout = 0.2
+mamba_layers = 6
+mamba_d_state = 16
+mamba_kernel_size = 3
+mamba_d_discr = 0

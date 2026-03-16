@@ -1,0 +1,118 @@
+[pipeline]
+mode = "model"                     # segment | model (alias: transformer)
+run_train = true
+run_predict = false
+
+[search]
+mode = "single"                      # "single" | "greedy" | "full"
+params_file = "configs/search_params.toml"
+objective = "best_frame_ccc_mean"  # best_ccc_mean | best_frame_ccc_mean
+
+[embeddings]
+enabled = true
+source = "qwen"                 # hf_text | qwen
+use_cache = true
+force_reextract = false
+cache_dir = "features"
+pooling = "mean"                    # mean | cls
+meta_subdir = true                  # add model/max_length/pooling tag to cache folder
+prepare_train = true
+prepare_val = true
+prepare_test = false
+
+# Used when embeddings.source = "qwen"
+qwen_branch = "multimodal"         # multimodal | visual | text
+qwen_pool = "last"                 # mean | std | last
+qwen_train_pickle = "dataset/train_segment_embeddings_Qwen3-VL-4B-Instruct.pkl"
+qwen_val_pickle = "dataset/val_segment_embeddings_Qwen3-VL-4B-Instruct.pkl"
+qwen_test_pickle = "dataset/test_segment_embeddings_Qwen3-VL-4B-Instruct.pkl"
+qwen_test_csv = "dataset/test_segment_Qwen3-VL-4B-Instruct.csv"
+
+[frame_eval]
+enabled = true
+val_frame_gt_csv = "dataset/val_by_frame.csv"
+pred_group_col = "stream_name"
+pred_video_col = "video_name"
+gt_video_col = "video_name"
+normalize_video_name = true
+frame_col = "frame_idx"
+val_col = "valence"
+aro_col = "arousal"
+filter_invalid_gt = true
+invalid_threshold = -4.9
+
+[train]
+train_csv = "dataset/train_segment_Qwen3-VL-4B-Instruct.csv"
+val_csv = "dataset/val_segment_Qwen3-VL-4B-Instruct.csv"
+output_dir = "results/text_va_hf"
+
+model_name = "michellejieli/emotion_text_classifier"
+max_length = 96
+batch_size = 8
+epochs = 100
+lr = 0.0003
+weight_decay = 0.001
+optimizer = "adamw"                # adamw | adam | sgd | rmsprop
+momentum = 0.9                     # used by sgd/rmsprop
+nesterov = false                   # used by sgd
+adam_beta1 = 0.9                   # used by adam/adamw
+adam_beta2 = 0.999                 # used by adam/adamw
+adam_eps = 1e-8                    # used by adam/adamw
+selection_metric = "frame_ccc_mean" # segment_ccc_mean | frame_ccc_mean | neg_val_loss
+dropout = 0.15
+head_hidden_dim = 512               # 0 -> linear head, >0 -> MLP head hidden size
+head_dropout = 0.3                  # dropout inside MLP head
+freeze_backbone = true
+early_stopping_patience = 12
+early_stopping_min_delta = 0.0
+seed = 42
+num_workers = 0
+device = "cuda"
+
+limit_train = 0
+limit_val = 0
+
+[model]
+# Used when pipeline.mode = "model" (or "transformer")
+
+# Common model params
+group_col = "stream_name"
+model_arch = "mamba"          # transformer | mamba
+model_d_model = 256
+model_dropout = 0.2
+model_head_hidden_dim = 512
+model_head_dropout = 0.2
+window_size = 16                    # 0 -> full sequence per video
+window_stride = 8                   # used only when window_size > 0
+drop_overlapping_segments = false   # if true, keep only non-overlapping segments per video before windowing
+
+# Transformer-only params
+transformer_nhead = 8
+transformer_layers = 4
+transformer_ff_dim = 512
+transformer_positional_encoding = true
+transformer_gate_mode = "none"      # none | bt | bd | t | d
+transformer_max_seq_len = 8192
+
+# Mamba-only params
+mamba_layers = 12
+mamba_d_state = 8
+mamba_kernel_size = 5
+mamba_d_discr = 0                   # 0 -> auto
+
+# Optional manual paths (if embeddings step disabled):
+# train_embeddings_pt = "features/<meta>/train_embeddings.pt"
+# val_embeddings_pt = "features/<meta>/val_embeddings.pt"
+
+[predict]
+checkpoint = "results/text_va_hf/best_model.pt"
+test_csv = "dataset/test_segment.csv"
+output_csv = "results/text_va_hf/test_segment_predictions.csv"
+expand_to_frame = false
+frame_output_csv = "results/text_va_hf/test_frame_predictions.csv"
+frame_group_col = "stream_name"
+frame_output_video_col = "video_name"
+batch_size = 32
+num_workers = 0
+device = "cuda"
+limit_test = 0
