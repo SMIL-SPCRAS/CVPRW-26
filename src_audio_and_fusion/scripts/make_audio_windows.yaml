@@ -1,0 +1,13 @@
+paths:
+  labels_dir: "data/labels_segmented"
+  openmouth_dir: "data/openmouth"
+  fps_csv: "data/videos_fps.csv"
+  output_dir: "data/labels_segmented_s2s_8_wav"
+
+smoothing:
+  min_open_sec: 0.20      # remove short open blips
+  max_gap_sec: 0.15       # fill short closed gaps
+
+window_filter:
+  min_open_ratio: 0.25
+  min_coverage_ratio: 0.80

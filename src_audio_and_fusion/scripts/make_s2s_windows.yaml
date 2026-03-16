@@ -1,0 +1,36 @@
+# Paths
+videos_dir: "data/videos"
+ann_root: "data/labels/VA_Estimation_Challenge"
+output_root: "data/labels_segmented_s2s_8"
+
+# Which subsets to process
+subsets:
+  - "train"
+  - "val"
+  - "test"
+
+# Limit number of videos per subset (0 = all)
+max_videos: 0
+
+# Skip segments that already exist
+skip_existing: true
+
+# Parallel workers (use 1 for HDD, 2-4 for SSD)
+workers: 1
+
+# Show per-video segment progress (only works with workers=1)
+show_segment_progress: true
+
+# Segmentation window (seconds)
+win_max_length: 4
+win_shift: 2
+win_min_length: 1
+s2s_frames: 4
+
+# Missing VA value
+missing_value: -5
+
+# Test annotations (single file with image_location,valence,arousal)
+test_ann_file: "data/labels/VA_Estimation_Challenge/CVPR_6th_ABAW_VA_test_set_example.txt"
+# For test: empty -> leave valence/arousal blank; minus5 -> fill with -5
+test_fill_mode: "empty"

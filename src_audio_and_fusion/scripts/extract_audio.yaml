@@ -1,0 +1,10 @@
+input_root: "Chunk"
+output_root: "data/Chunk_wav"
+
+ffmpeg_bin: "ffmpeg"        # or /full/path/to/ffmpeg
+sample_rate: 16000
+channels: 1
+
+video_exts: ["mp4", "mkv", "mov", "avi", "webm", "m4v"]
+overwrite: false
+workers: 4
