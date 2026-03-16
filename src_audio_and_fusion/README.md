@@ -17,7 +17,7 @@ The pipeline is organized as follows:
 
 ## 1. Installation
 
-The project uses **Poetry** and depends on a local editable copy of `chimera_ml`.
+The project uses **Poetry** and depends on a local editable copy of [Chimera ML](https://github.com/markitantov/chimera_ml).
 
 ### Requirements
 
@@ -215,7 +215,7 @@ These CSVs are consumed by the audio datamodules.
 
 ## Step 5. Train an audio model
 
-Audio training is done through `chimera_ml`.
+Audio training is done through [Chimera ML](https://github.com/markitantov/chimera_ml).
 
 Example:
 
